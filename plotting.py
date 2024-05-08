@@ -9,50 +9,92 @@ from random_variables import LaplaceRandomVariable, SmoothedRandomVariable, Unif
 POINTS = 100
 
 
-def print_statistics(modelling: Modelling):
-    mses = modelling.estimate_mse()
-    print("СКО:", mses)
-    variances = modelling.estimate_var()
-    print("Дисперсия: ", variances)
-    variances = modelling.estimate_bias_sqr()
-    print("Квадрат смещения: ", variances)
+# def print_statistics(modelling: Modelling):
+#     mses = modelling.estimate_mse()
+#     print("СКО:", mses)
+#     variances = modelling.estimate_var()
+#     print("Дисперсия: ", variances)
+#     bias_sqr = modelling.estimate_bias_sqr()
+#     print("Квадрат смещения: ", bias_sqr)
 
 
-def plot_samples(sample, bandwidth):
-    x_min = min(sample)
-    x_max = max(sample)
-    x = np.linspace(x_min, x_max, POINTS)
-    srv = SmoothedRandomVariable(sample, bandwidth)
-    y = np.vectorize(srv.pdf)(x)
-    plt.plot(x, y)
+# def plot_samples(sample, bandwidth):
+#     x_min = min(sample)
+#     x_max = max(sample)
+#     x = np.linspace(x_min, x_max, POINTS)
+#     srv = SmoothedRandomVariable(sample, bandwidth)
+#     y = np.vectorize(srv.pdf)(x)
+#     plt.plot(x, y)
+#     plt.show()
+
+def plot_samples(alpha_values, bias_sqr_values, var_values, mse_values):
+    plt.figure(figsize=(10, 6))
+
+    # Plot for bias squared values
+    plt.subplot(3, 1, 1)
+    plt.plot(alpha_values, bias_sqr_values, label='Bias Squared')
+    plt.xlabel('Alpha')
+    plt.ylabel('Bias Squared')
+    plt.title('Bias Squared vs Alpha')
+    plt.grid(True)
+    plt.legend()
+
+    # Plot for variance values
+    plt.subplot(3, 1, 2)
+    plt.plot(alpha_values, var_values, label='Variance')
+    plt.xlabel('Alpha')
+    plt.ylabel('Variance')
+    plt.title('Variance vs Alpha')
+    plt.grid(True)
+    plt.legend()
+
+    # Plot for MSE values
+    plt.subplot(3, 1, 3)
+    plt.plot(alpha_values, mse_values, label='MSE')
+    plt.xlabel('Alpha')
+    plt.ylabel('MSE')
+    plt.title('MSE vs Alpha')
+    plt.grid(True)
+    plt.legend()
+
+    plt.tight_layout()
     plt.show()
+
 
 
 def run_modelling(number_resample: int, location: float, resamples: list, N):
     # Поиск наилучшего alpha
-    alpha_values = [i for i in np.arange(0.01, 0.5, 0.01)]
+    alpha_values = [i for i in np.arange(0.01, 0.51, 0.01)]
     mse_values = []  # СКО
+    var_values = []  # Дисперсия
+    bias_sqr_values = []  # Квадрат смещения
 
     for alpha in alpha_values:
         tm_estimator = TruncatedMean(alpha)
-        mses = []
-        for i in range(N):
+        tm_sample = []
+        for i in range(number_resample):
             sample = resamples[i]
             tm = tm_estimator.estimate(sample)
-            mse = (tm - 0.5) ** 2
-            mses.append(mse)
-        mse_values.append(np.mean(mses))
+            tm_sample.append(tm)
 
-    # Определение наилучшего значения alpha
-    best_alpha = alpha_values[np.argmin(mse_values)]
-    print(f'Наилучшее значение alpha: {best_alpha}')
+        modelling = Modelling(tm_sample, location, number_resample)
+        modelling.run()
 
-    truncated_sample = [TruncatedMean(best_alpha).estimate(sample) for sample in resamples]
+        mse_values.append(modelling.estimate_mse())
+        var_values.append(modelling.estimate_var())
+        bias_sqr_values.append(modelling.estimate_bias_sqr())
 
-    modelling = Modelling(truncated_sample, location, number_resample)
-    modelling.run()
 
-    return modelling
+    # # Определение наилучшего значения alpha
+    # best_alpha = alpha_values[np.argmin(mse_values)]
+    # print(f'Наилучшее значение alpha: {best_alpha}')
+    #
+    # truncated_sample = [TruncatedMean(best_alpha).estimate(sample) for sample in resamples]
+    #
+    # modelling = Modelling(truncated_sample, location, number_resample)
+    # modelling.run()
+
+    return alpha_values, mse_values, var_values, bias_sqr_values
 
 
 def without_emissions(location: float, scale: float, N: int, number_resample: int):
@@ -65,13 +107,19 @@ def without_emissions(location: float, scale: float, N: int, number_resample: in
 
     modelling = run_modelling(number_resample, location, resamples, N)
 
-    print_statistics(modelling)
+    alpha_values = modelling[0]
+    mse_values = modelling[1]
+    var_values = modelling[2]
+    bias_sqr_values = modelling[3]
 
-    sample = modelling.get_sample()
+    # print_statistics(modelling)
 
-    bandwidth = 0.1
+    # sample = modelling.get_sample()
 
-    plot_samples(sample, bandwidth)
+    # bandwidth = 0.1
+
+    # plot_samples(sample, bandwidth)
+    plot_samples(alpha_values, mse_values, var_values, bias_sqr_values)
 
 
 def with_symmetrical_emissions(location: float, scale: float, N: int, number_resample: int):
@@ -86,13 +134,19 @@ def with_symmetrical_emissions(location: float, scale: float, N: int, number_res
 
     modelling = run_modelling(number_resample, location, resamples, N)
 
-    print_statistics(modelling)
+    alpha_values = modelling[0]
+    mse_values = modelling[1]
+    var_values = modelling[2]
+    bias_sqr_values = modelling[3]
 
-    sample = modelling.get_sample()
+    # print_statistics(modelling)
 
-    bandwidth = 0.1
+    # sample = modelling.get_sample()
 
-    plot_samples(sample, bandwidth)
+    # bandwidth = 0.1
+
+    # plot_samples(sample, bandwidth)
+    plot_samples(alpha_values, mse_values, var_values, bias_sqr_values)
 
 
 def with_asymmetrical_emissions(location: float, scale: float, N: int, number_resample: int):
@@ -108,9 +162,15 @@ def with_asymmetrical_emissions(location: float, scale: float, N: int, number_re
 
     modelling = run_modelling(number_resample, location, resamples, N)
 
-    print_statistics(modelling)
+    alpha_values = modelling[0]
+    mse_values = modelling[1]
+    var_values = modelling[2]
+    bias_sqr_values = modelling[3]
 
-    sample = modelling.get_sample()
+    # print_statistics(modelling)
 
-    bandwidth = 0.1
-    plot_samples(sample, bandwidth)
+    # sample = modelling.get_sample()
+
+    # bandwidth = 0.1
+    # plot_samples(sample, bandwidth)
+    plot_samples(alpha_values, mse_values, var_values, bias_sqr_values)

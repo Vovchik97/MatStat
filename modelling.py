@@ -38,11 +38,11 @@ class Modelling(ABC):
 
     # Метод, оценивающий квадрат смещения оценок
     def estimate_bias_sqr(self):
-        return np.array((Mean().estimate(self.estimations_sample) - self.truth_value) ** 2)
+        return (Mean().estimate(self.estimations_sample) - self.truth_value) ** 2
 
     # Метод, оценивающий дисперсию оценок
     def estimate_var(self):
-        return np.array(Var().estimate(self.estimations_sample))
+        return Var().estimate(self.estimations_sample)
 
     # Метод, оценивающий СКО оценок
     def estimate_mse(self):
