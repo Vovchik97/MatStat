@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
-
 class RandomVariable(ABC):
     @abstractmethod
     def pdf(self, x):
@@ -129,3 +128,18 @@ class SmoothedRandomVariable(RandomVariable, ABC):
 
     def quantile(self, alpha):
         raise NotImplementedError
+
+# class SmoothedRandomVariable(RandomVariable, ABC):
+#     def __init__(self, sample, core, bandwidth):
+#         self.sample = sample
+#         self.core = core
+#         self.h = bandwidth
+#
+#     def pdf(self, x):
+#         return np.mean([self.core._k((x - y) / self.h) for y in self.sample]) / self.h
+#
+#     def cdf(self, x):
+#         return np.mean([self.core._K((x - y) / self.h) for y in self.sample])
+#
+#     def quantile(self, alpha):
+#         raise NotImplementedError
