@@ -31,7 +31,7 @@ tk.Label(root, text="Выберите тип выбросов:").grid(row=0, col
 tk.Radiobutton(root, text="Без выбросов", variable=emission_var, value=1).grid(row=1, column=0, sticky="w", padx=10)
 tk.Radiobutton(root, text="С симметричными выбросами", variable=emission_var, value=2).grid(row=2, column=0, sticky="w",
                                                                                             padx=10)
-tk.Radiobutton(root, text="С ассиметричными выбросами", variable=emission_var, value=3).grid(row=3, column=0,
+tk.Radiobutton(root, text="С асимметричными выбросами", variable=emission_var, value=3).grid(row=3, column=0,
                                                                                              sticky="w", padx=10)
 
 # location
@@ -49,6 +49,12 @@ tk.Entry(root, textvariable=n_var).grid(row=6, column=1, padx=10)
 # number of resample
 tk.Label(root, text="Number of Resample:").grid(row=7, column=0, sticky="w", padx=10, pady=5)
 tk.Entry(root, textvariable=number_resample_var).grid(row=7, column=1, padx=10)
+
+# Set default values
+location_var.set(0)
+scale_var.set(1)
+n_var.set(50)
+number_resample_var.set(100)
 
 tk.Button(root, text="Запустить", command=run_emission).grid(row=8, columnspan=2, pady=10)
 
